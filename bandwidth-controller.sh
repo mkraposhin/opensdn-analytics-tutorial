@@ -6,7 +6,7 @@
 export CONTROLLER_IP=172.16.0.19
 export ANALYTICS_PORT=8081
 export COMPUTE_IP=172.16.0.54
-export VMI_FQ_NAME=default-domain:admin:int-port-1
+export VMI_FQ_NAME=default-domain:a-lab:port-1
 export WAIT_TIME=1
 export SHOW_ONLY=F
 #export R_REF=1048576 # B/s
@@ -34,7 +34,7 @@ export E_D=0
 export BW=0
 
 function tap_interface() {
-    iface_mac=$(curl -s http://$CONTROLLER_IP:$ANALYTICS_PORT/analytics/uves/virtual-machine-interface/default-domain:a-lab:port-1?flat | jq -r '.UveVMInterfaceAgent.mac_address')
+    iface_mac=$(curl -s http://$CONTROLLER_IP:$ANALYTICS_PORT/analytics/uves/virtual-machine-interface/$VMI_FQ_NAME?flat | jq -r '.UveVMInterfaceAgent.mac_address')
     iface_tap="${iface_mac:3:14}"
     iface_tap=tap`echo $iface_tap | rev | sed "s/:/-/" | rev | sed "s/://g"`
     echo $iface_tap
