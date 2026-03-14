@@ -8,7 +8,6 @@ export ANALYTICS_PORT=8081
 export COMPUTE_IP=172.16.0.54
 export VMI_FQ_NAME=default-domain:admin:int-port-1
 export WAIT_TIME=1
-export TAP_NAME=tap66d9c3a0-52
 export SHOW_ONLY=F
 #export R_REF=1048576 # B/s
 export R_REF=10240 # B/s
@@ -34,6 +33,12 @@ export E_I=0
 export E_D=0
 export BW=0
 
+function tap_interface() {
+    iface_mac=$(curl -s http://$CONTROLLER_IP:$ANALYTICS_PORT/analytics/uves/virtual-machine-interface/default-domain:a-lab:port-1?flat | jq -r '.UveVMInterfaceAgent.mac_address')
+    iface_tap="${iface_mac:3:14}"
+    iface_tap=tap`echo $iface_tap | rev | sed "s/:/-/" | rev | sed "s/://g"`
+    echo $iface_tap
+}
 
 function read_bytescount() {
     local intf_state=`curl -s http://$CONTROLLER_IP:$ANALYTICS_PORT/analytics/uves/virtual-machine-interface/$VMI_FQ_NAME?flat`
@@ -51,6 +56,7 @@ function set_bandwidth() {
     ssh root@$COMPUTE_IP "/root/wondershaper/wondershaper -m -a $tap -u $bw_kbitps -d $bw_kbitps"
 }
 
+TAP_NAME=`tap_interface`
 values=(`read_bytescount`)
 T_C=${values[0]}
 B_C=${values[2]}
