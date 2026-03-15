@@ -8,13 +8,12 @@ export ANALYTICS_PORT=8081
 export COMPUTE_IP=172.16.0.54
 export VMI_FQ_NAME=default-domain:a-lab:port-1
 export WAIT_TIME=1
-export SHOW_ONLY=F
-#export R_REF=1048576 # B/s
+export SHOW_ONLY=N
 export R_REF=10240 # B/s
+#export R_REF=1048576 # B/s
 export K_P=0.5
-#export T_I=`expr 1000 \* 1000 \* 1000 \* 1000`
-export T_I=10000
-export T_D=1
+export T_I=10000000
+export T_D=0.01
 
 
 #
@@ -53,6 +52,7 @@ function set_bandwidth() {
     local tap=$1
     local bw_bps=$2
     local bw_kbitps=`expr $bw_bps \* 8 / 1024`
+    echo "$1 $2"
     ssh root@$COMPUTE_IP "/root/wondershaper/wondershaper -m -a $tap -u $bw_kbitps -d $bw_kbitps"
 }
 
@@ -86,10 +86,9 @@ do
     E_I1=`expr \( $E_C + $E_O \) \* \( $T_C - $T_O \) / 2`
     E_I=`expr $E_I + $E_I1`
     E_D=`expr \( $E_C - $E_O \) / \( $T_C - $T_O \)`
-    #DELTA_B=`expr $K_P \* \( $E_C + $E_I / $T_I + $E_D \* $T_D \)`
     DELTA_B=`echo "$K_P * ( $E_C + $E_I / $T_I + $E_D * $T_D )" | bc`
     DELTA_B=`echo ${DELTA_B%%.*}`
-    BW=`expr $BW + $DELTA_B`
+    BW=`expr $R_C + $DELTA_B`
     if [ $BW -lt 0 ]
     then
         BW=0
